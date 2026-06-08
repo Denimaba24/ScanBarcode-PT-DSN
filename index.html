@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Barcode Pabrik - Super Scanner & Kalkulator</title>
+    <title>Sistem Barcode Pabrik - Fix Camera Mobile</title>
     <script src="https://unpkg.com/@zxing/library@0.19.1/bundle/index.min.js"></script>
     <style>
         :root {
@@ -77,25 +77,26 @@
 
         .page.active { display: block; }
 
-        /* Area Kamera Viewfinder */
+        /* Container Kamera Viewfinder Mobile Friendly */
         .scanner-container {
             position: relative;
             width: 100%;
-            height: 280px;
+            height: 300px;
             background: #000;
             border-radius: 12px;
             overflow: hidden;
             margin-bottom: 1rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
         }
 
+        /* MEMAKSA KAMERA AKTIF DAN TIDAK BLACK SCREEN DI HP */
         #video {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
 
-        /* Tombol Ganti Kamera Universal Icon */
+        /* Ikon Tukar Kamera Melayang */
         .btn-sync-camera {
             position: absolute;
             top: 12px;
@@ -110,28 +111,28 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
 
         .btn-sync-camera svg { width: 22px; height: 22px; fill: #334155; }
 
-        /* Laser Line Simulation */
+        /* Simulasi Laser Scanner */
         .laser-line {
             position: absolute;
             top: 50%;
             left: 5%;
             width: 90%;
             height: 2px;
-            background-color: red;
-            box-shadow: 0 0 8px red;
+            background-color: #ef4444;
+            box-shadow: 0 0 10px #ef4444;
             z-index: 5;
-            animation: scanMotion 2s infinite ease-in-out;
+            animation: scanMotion 2.5s infinite ease-in-out;
         }
 
         @keyframes scanMotion {
-            0% { top: 30%; }
-            50% { top: 70%; }
-            100% { top: 30%; }
+            0% { top: 25%; }
+            50% { top: 75%; }
+            100% { top: 25%; }
         }
 
         .form-group { margin-bottom: 1rem; }
@@ -140,9 +141,9 @@
             width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 1rem;
         }
 
-        /* Besar & Mencolok untuk Tombol Utama Pencet Scan */
+        /* Tombol Trigger Utama */
         .btn-trigger-scan {
-            background-color: #ef4444;
+            background-color: var(--danger);
             color: white;
             border: none;
             padding: 1rem;
@@ -151,7 +152,7 @@
             font-size: 1.2rem;
             width: 100%;
             cursor: pointer;
-            box-shadow: 0 4px 6px rgba(239, 68, 68, 0.3);
+            box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);
             margin-bottom: 1.5rem;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -172,12 +173,16 @@
             padding: 0.8rem; background-color: #d1fae5; color: #065f46; border-radius: 8px;
             font-weight: bold; text-align: center; margin-bottom: 1rem; display: none;
         }
+        
+        .camera-error-msg {
+            position: absolute; top: 40%; width: 90%; left: 5%; color: white; text-align: center; font-size: 0.9rem; display: none; z-index: 8; background: rgba(0,0,0,0.7); padding: 10px; border-radius: 6px;
+        }
     </style>
 </head>
 <body>
 
     <header>
-        <h3>Sistem Scanner HP Pabrik v3.0</h3>
+        <h3>Sistem Scanner HP Pabrik v3.1-Stable</h3>
     </header>
     
     <nav>
@@ -194,14 +199,15 @@
                     <svg viewBox="0 0 24 24"><path d="M19 8l-4 4h3c0 3.31-2.69 6-6 6-1.01 0-1.97-.25-2.8-.7l-1.46 1.46C8.97 19.54 10.43 20 12 20c4.42 0 8-3.58 8-8h3l-4-4zM6 12c0-3.31 2.69-6 6-6 1.01 0 1.97.25 2.8.7l1.46-1.46C15.03 4.46 13.57 4 12 4c-4.42 0-8 3.58-8 8H1l4 4 4-4H6z"/></svg>
                 </button>
                 <div class="laser-line"></div>
-                <video id="video"></video>
+                <div id="camError" class="camera-error-msg"></div>
+                <video id="video" autoplay muted playsinline></video>
             </div>
 
-            <button class="btn-trigger-scan" onclick="triggerManualScan()">🔴 PENCET UNTUK SCAN BARCODE</button>
+            <button class="btn-trigger-scan" onclick="triggerManualScan()">🔴 PENCET UNTUK AMBIL DATA BARCODE</button>
 
             <div class="form-group">
-                <label>Hasil Tangkapan / Barcode Terbaca</label>
-                <input type="text" id="liveCodePreview" placeholder="Dekatkan barcode ke kamera lalu tekan tombol merah diatas..." style="text-align: center; font-weight: bold; color: var(--primary); border: 2px solid var(--primary);">
+                <label>Hasil Tangkapan Kamera (Real-Time)</label>
+                <input type="text" id="liveCodePreview" placeholder="Membidik Barcode..." style="text-align: center; font-weight: bold; color: var(--primary); border: 2px solid var(--primary);" readonly>
             </div>
 
             <div class="action-grid">
@@ -251,7 +257,7 @@
                     </div>
                     <div class="form-group">
                         <label>Persegi (m²)</label>
-                        <input type="number" step="0.01" id="m_persegi" required value="0">
+                        <input type="number" step="0.001" id="m_persegi" required value="0">
                     </div>
                     <div class="form-group" style="grid-column: span 2;">
                         <label>Golongan</label>
@@ -307,18 +313,19 @@
             }
         }
 
-        // ================= KONTROL ENGINES KAMERA ZXING =================
+        // ================= ENGINE INKORPORASI KAMERA HP FIX =================
         function initCameraEngine() {
             if(isScanningActive) return;
             
+            document.getElementById('camError').style.display = 'none';
             codeReader = new ZXing.BrowserMultiFormatReader();
             
             codeReader.listVideoInputDevices()
                 .then((videoInputDevices) => {
                     cameraDevices = videoInputDevices;
                     if (cameraDevices.length > 0) {
-                        // Cari kamera belakang secara default (environment)
-                        let backCam = cameraDevices.find(device => device.label.toLowerCase().includes('back') || device.label.toLowerCase().includes('environment'));
+                        // Cari kamera belakang (back / environment) secara otomatis
+                        let backCam = cameraDevices.find(device => device.label.toLowerCase().includes('back') || device.label.toLowerCase().includes('environment') || device.label.toLowerCase().includes('belakang'));
                         if(backCam) {
                             selectedDeviceId = backCam.deviceId;
                             currentCamIndex = cameraDevices.indexOf(backCam);
@@ -328,26 +335,31 @@
                         }
                         startStream();
                     } else {
-                        alert("Kamera tidak ditemukan pada perangkat ini.");
+                        showCamError("Kamera hardware tidak ditemukan.");
                     }
                 })
-                .catch((err) => console.error(err));
+                .catch((err) => {
+                    console.error(err);
+                    showCamError("Error Hak Akses Kamera. Pastikan menggunakan HTTPS!");
+                });
         }
 
         function startStream() {
             isScanningActive = true;
-            // Membuka stream video resolusi HD penuh agar garis barcode rapat terbaca sempurna
+            
+            // Konfigurasi Fleksibel Resolusi Tinggi agar tidak Crash/Layar Hitam
             const constraints = {
                 video: {
                     deviceId: selectedDeviceId ? { exact: selectedDeviceId } : undefined,
-                    width: { ideal: 1920 },
-                    height: { ideal: 1080 }
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 },
+                    facingMode: "environment"
                 }
             };
 
             codeReader.decodeFromConstraints(constraints, 'video', (result, err) => {
                 if (result) {
-                    // Update field preview secara real-time saat terbidik kamera
+                    // Masukkan hasil scan secara instan ke kolom preview saat terbidik kamera
                     document.getElementById('liveCodePreview').value = result.text;
                 }
             });
@@ -362,7 +374,7 @@
 
         function changeCamera() {
             if (cameraDevices.length <= 1) {
-                alert("Hanya ada 1 kamera yang terdeteksi.");
+                alert("Perangkat Anda hanya mendeteksi 1 kamera aktif.");
                 return;
             }
             currentCamIndex = (currentCamIndex + 1) % cameraDevices.length;
@@ -374,16 +386,21 @@
             }
         }
 
-        // ================= LOGIKA UTAMA: TOMBOL PENCET SCAN & HITUNG OTOMATIS =================
+        function showCamError(text) {
+            const errDiv = document.getElementById('camError');
+            errDiv.textContent = text;
+            errDiv.style.display = 'block';
+        }
+
+        // ================= LOGIKA UTAMA: PENCET SCAN & HITUNG MATEMATIS =================
         function triggerManualScan() {
             const barcodeResult = document.getElementById('liveCodePreview').value.trim();
             
-            if (!barcodeResult || barcodeResult.startsWith("Dekatkan")) {
-                alert("Kamera belum menangkap baris kode secara fokus. Arahkan garis merah ke tengah barcode lalu tekan kembali!");
+            if (!barcodeResult || barcodeResult.startsWith("Membidik")) {
+                alert("Kamera belum mengunci fokus kode. Arahkan garis laser merah tepat di tengah Barcode, tunggu hingga teks kodenya muncul, lalu klik tombol merah kembali!");
                 return;
             }
 
-            // Jalankan fungsi hitung otomatis & simpan data
             prosesKalkulasiData(barcodeResult);
         }
 
@@ -394,25 +411,23 @@
             let persegi = 0;
             let golongan = "Scan Otomatis";
 
-            // LOGIKA EXTRAKSI MATEMATIKA UNTUK BARCODE PABRIK (Gambar 1)
-            // Cek jika barcode adalah kode pabrik panjang (contoh: 8600000000002306-A0032255001350024)
+            // LOGIKA EXTRAKSI NILAI JIKA DATA KODE ADALAH BARCODE UTAMA PABRIK (Gambar 1)
             if (kode.length >= 30 && kode.startsWith("8600")) {
                 let len = kode.length;
                 
-                // Ambil nilai berdasarkan index digit dari belakang
-                jumlah = parseInt(kode.substring(len - 4), 10); // 4 digit terakhir (0024)
-                lebar = parseFloat(code.substring(len - 9, len - 4)) / 10; // 5 digit sebelum jumlah (00135 -> 13.5)
-                panjang = parseInt(kode.substring(len - 12, len - 9), 10); // 3 digit sebelum lebar (255)
+                // Ambil nilai dari urutan baris digit dari belakang
+                jumlah = parseInt(kode.substring(len - 4), 10); // 4 digit terakhir (Contoh: 0024 -> 24)
+                lebar = parseFloat(kode.substring(len - 9, len - 4)) / 10; // 5 digit sebelum jumlah (Contoh: 00135 -> 13.5)
+                panjang = parseInt(kode.substring(len - 12, len - 9), 10); // 3 digit sebelum lebar (Contoh: 255 -> 255)
                 
-                // HITUNG RUMUS PERSEGI (M2) 
+                // RUMUS PERSEGI (M2) SESUAI SPESIFIKASI ACUAN: (P * L * Jml) / 10000
                 persegi = (panjang * lebar * jumlah) / 10000;
-                persegi = Math.round(persegi * 100) / 100; // Pembulatan 2 angka desimal (8.26)
+                persegi = Math.round(persegi * 1000) / 1000; // Pembulatan presisi desimal (Contoh: 8.262)
                 
-                golongan = "Tipe " + kode.substring(12, 18); // Potong kode tipe (2306-A)
+                golongan = "Tipe " + kode.substring(12, 18);
             } 
-            // LOGIKA UNTUK BARCODE PRODUK UMUM (Gambar 2 - EAN-13 / lainnya)
+            // LOGIKA JIKA BARCODE ADALAH PRODUK UMUM (Gambar 2 - EAN Standard)
             else {
-                // Jika sudah ada acuan di Master, pakai data master
                 if (masterData[kode]) {
                     const item = masterData[kode];
                     panjang = item.panjang;
@@ -421,25 +436,22 @@
                     persegi = item.persegi;
                     golongan = item.golongan;
                 } else {
-                    // Default nilai jika produk baru belum disetting ukurannya
                     panjang = 0; lebar = 0; jumlah = 0; persegi = 0; golongan = "EAN Standard";
                 }
             }
 
-            // JIKA BELUM ADA DI MASTER BARANG, OTOMATIS TERSIMPAN DI MASTER SEBAGAI DATABASE UTAMA
-            if (!masterData[kode]) {
-                masterData[kode] = {
-                    panjang: panjang,
-                    lebar: lebar,
-                    jumlah: jumlah,
-                    persegi: persegi,
-                    golongan: golongan
-                };
-                localStorage.setItem('masterBarang', JSON.stringify(masterData));
-                renderMasterTable();
-            }
+            // SIMPAN / UPDATE AUTOMATIS KE MASTER DATA
+            masterData[kode] = {
+                panjang: panjang,
+                lebar: lebar,
+                jumlah: jumlah,
+                persegi: persegi,
+                golongan: golongan
+            };
+            localStorage.setItem('masterBarang', JSON.stringify(masterData));
+            renderMasterTable();
 
-            // SIMPAN KE TABEL RIWAYAT SCAN BERDASARKAN TANGGAL HARI INI
+            // REKAP DATA BERDASARKAN WAKTU SCAN REAL-TIME
             const now = new Date();
             const tanggal = now.toISOString().split('T')[0];
             const jam = now.toTimeString().split(' ')[0];
@@ -459,16 +471,15 @@
             localStorage.setItem('scanHistory', JSON.stringify(scanHistory));
             
             renderScanTable();
-            showToast(`Data Berhasil Direkam: ${kode}`);
+            showToast(`Sukses Merekam & Menghitung Data Barcode!`);
             
-            // Getar HP tanda sukses input
-            if(window.navigator && window.navigator.vibrate){ window.navigator.vibrate(150); }
+            if(window.navigator && window.navigator.vibrate){ window.navigator.vibrate(100); }
             
-            // Bersihkan kolom preview agar siap untuk item selanjutnya
+            // Bersihkan form preview agar siap membidik barcode berikutnya
             document.getElementById('liveCodePreview').value = "";
         }
 
-        // ================= RENDERING TABEL & INTERFACE =================
+        // ================= MANAGEMENT INTERFACE & EXPORT =================
         function showToast(msg) {
             const toast = document.getElementById('toastMessage');
             toast.textContent = msg;
@@ -487,10 +498,10 @@
                         <td style="font-weight: bold;">${record.panjang}</td>
                         <td style="font-weight: bold;">${record.lebar}</td>
                         <td style="font-weight: bold;">${record.jumlah}</td>
-                        <td style="color: green; font-weight: bold; font-size:0.95rem;">${record.persegi} m²</td>
+                        <td style="color: #059669; font-weight: bold; font-size:0.95rem;">${record.persegi} m²</td>
                         <td>${record.tanggal}</td>
                         <td>${record.jam}</td>
-                        <td><span style="background: #e2e8f0; padding: 2px 6px; border-radius:4px; font-size: 0.8rem;">${record.golongan}</span></td>
+                        <td><span style="background: #e2e8f0; padding: 2px 6px; border-radius:4px; font-size:0.8rem;">${record.golongan}</span></td>
                     </tr>
                 `;
             });
@@ -532,7 +543,7 @@
             e.target.reset();
             document.getElementById('m_golongan').value = "Scan Otomatis";
             renderMasterTable();
-            alert('Database Master Berhasil Diperbarui!');
+            alert('Data Master Pabrik Berhasil Diperbarui!');
         }
 
         function editMaster(kode){
@@ -563,7 +574,7 @@
 
         function exportToExcel() {
             if (scanHistory.length === 0) {
-                alert('Tidak ada data untuk di-export.');
+                alert('Tidak ada data rekap untuk diexport.');
                 return;
             }
             let csvContent = "No,Kode Barcode,Panjang,Lebar,Jml Potongan,Persegi (m2),Tanggal Scan,Jam Scan,Golongan\n";
@@ -576,14 +587,14 @@
             const url = URL.createObjectURL(blob);
             const dateStr = new Date().toISOString().split('T')[0];
             link.setAttribute("href", url);
-            link.setAttribute("download", `Rekap_Pabrik_${dateStr}.csv`);
+            link.setAttribute("download", `Rekap_Pabrik_Kayu_${dateStr}.csv`);
             link.style.visibility = 'hidden';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
         }
 
-        // Start Up Aplikasi
+        // Inisialisasi Booting Awal Aplikasi
         renderMasterTable();
         renderScanTable();
         setTimeout(() => { initCameraEngine(); }, 400);
