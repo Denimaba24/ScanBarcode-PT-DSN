@@ -112,6 +112,17 @@
         .btn-action:hover {
             background-color: #059669;
         }
+        .btn-camera {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            border-radius: 4px;
+            font-weight: bold;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
         .btn-danger {
             background-color: #ef4444;
             color: white;
@@ -122,12 +133,15 @@
             font-weight: bold;
             width: 100%;
         }
-        /* Penyesuaian UI Kamera */
         #reader {
             width: 100%;
             margin-bottom: 1rem;
             border-radius: 8px;
             overflow: hidden;
+            background-color: #000;
+        }
+        #reader video {
+            object-fit: cover;
         }
         .alert {
             padding: 1rem;
@@ -136,7 +150,7 @@
             display: none;
             font-weight: bold;
             text-align: center;
-            word-wrap: break-word; /* Agar kode panjang tidak keluar kotak */
+            word-wrap: break-word;
         }
         .alert-error {
             background-color: #fee2e2;
@@ -165,10 +179,12 @@
             
             <div id="alertMessage" class="alert"></div>
 
+            <button class="btn-camera" onclick="toggleCamera()">🔄 Tukar Kamera (Depan / Belakang)</button>
+
             <div id="reader"></div>
 
-            <button class="btn-action" onclick="exportToExcel()">Export Barcode (Excel/CSV)</button>
-            <button class="btn-danger" onclick="clearScanHistory()">Hapus Riwayat Scan</button>
+            <button class="btn-action" onclick="exportToExcel()">📥 Export Barcode (Excel/CSV)</button>
+            <button class="btn-danger" onclick="clearScanHistory()">🗑️ Hapus Riwayat Scan</button>
 
             <div class="table-responsive">
                 <table id="tableScan">
@@ -193,11 +209,11 @@
 
         <div id="page-master" class="page">
             <h3 style="margin-top:0;">Master Barang</h3>
-            <p style="font-size: 0.85rem; color: #666;">Catatan: Masukkan *KODE BARCODE* persis sesuai deretan angka/huruf panjang yang terbaca oleh scanner.</p>
+            <p style="font-size: 0.85rem; color: #666;">Daftarkan KODE BARCODE persis seperti deretan angka yang muncul saat di-scan.</p>
             <form id="formMaster" onsubmit="saveMasterData(event)">
                 <div class="form-group">
-                    <label>Kode Barcode (Scan Result)</label>
-                    <input type="text" id="m_kode" required placeholder="Contoh: 8600000000002306-A...">
+                    <label>Kode Barcode</label>
+                    <input type="text" id="m_kode" required placeholder="Contoh: 860000...">
                 </div>
                 <div class="form-group">
                     <label>Panjang</label>
@@ -242,7 +258,8 @@
         let masterData = JSON.parse(localStorage.getItem('masterBarang')) || {};
         let scanHistory = JSON.parse(localStorage.getItem('scanHistory')) || [];
         
-        let html5QrcodeScanner;
+        let html5QrCode;
+        let isFrontCamera = false; // Default: Kamera Belakang (environment)
         let lastScannedCode = "";
         let lastScanTime = 0;
 
@@ -263,40 +280,55 @@
             }
         }
 
-        // ================= KAMERA SCANNER (REVISI UNTUK BARCODE PANJANG) =================
+        // ================= SISTEM KAMERA MANUAL =================
         function startScanner() {
-            if (!html5QrcodeScanner) {
-                // Konfigurasi Khusus Barcode Panjang (1D)
-                const config = { 
-                    fps: 15, // Dipercepat tangkapannya
-                    // AREA SCAN DIBUAT PERSEGI PANJANG TAPI LEBAR
-                    qrbox: { width: 350, height: 120 }, 
-                    // MEMAKSA SCANNER MENCARI FORMAT BARCODE PABRIK SAJA (Agar fokus & tidak ngelag)
-                    formatsToSupport: [
-                        Html5QrcodeSupportedFormats.CODE_128, // Tipe barcode di gambar kamu kemungkinan besar ini
-                        Html5QrcodeSupportedFormats.CODE_39,
-                        Html5QrcodeSupportedFormats.EAN_13
-                    ]
-                };
-
-                html5QrcodeScanner = new Html5QrcodeScanner("reader", config, false);
-                html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+            if (!html5QrCode) {
+                html5QrCode = new Html5Qrcode("reader");
             }
+
+            // Pengaturan kamera: 'user' untuk depan, 'environment' untuk belakang
+            const cameraConfig = isFrontCamera ? "user" : { facingMode: "environment" };
+            
+            const config = { 
+                fps: 15,
+                // qrbox DIHAPUS agar kamera menggunakan area full frame.
+                // Ini mencegah barcode panjang seperti gambar 1 terpotong.
+            };
+
+            html5QrCode.start(cameraConfig, config, onScanSuccess, onScanFailure)
+            .catch(err => {
+                console.error("Gagal memulai kamera:", err);
+                showMessage("Gagal membuka kamera. Pastikan izin kamera telah diberikan di browser.", false);
+            });
         }
 
         function stopScanner() {
-            if (html5QrcodeScanner) {
-                html5QrcodeScanner.clear().catch(error => {
-                    console.error("Gagal mematikan kamera", error);
+            if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().then(() => {
+                    html5QrCode.clear();
+                }).catch(err => console.error("Gagal mematikan kamera", err));
+            }
+        }
+
+        function toggleCamera() {
+            // Matikan kamera yang menyala, balik arahnya, lalu nyalakan lagi
+            if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().then(() => {
+                    isFrontCamera = !isFrontCamera;
+                    startScanner();
+                }).catch(err => {
+                    console.error("Gagal menukar kamera", err);
                 });
-                html5QrcodeScanner = null;
+            } else {
+                isFrontCamera = !isFrontCamera;
+                startScanner();
             }
         }
 
         function onScanSuccess(decodedText, decodedResult) {
             const currentTime = new Date().getTime();
             
-            // Mencegah scan ganda dalam 3 detik
+            // Jeda 3 detik agar tidak scan double
             if (decodedText === lastScannedCode && (currentTime - lastScanTime) < 3000) {
                 return; 
             }
@@ -304,7 +336,7 @@
             lastScannedCode = decodedText;
             lastScanTime = currentTime;
             
-            // Optional: Getaran jika scan berhasil masuk
+            // Getar HP jika sukses
             if(window.navigator && window.navigator.vibrate){
                 window.navigator.vibrate(200); 
             }
@@ -313,9 +345,10 @@
         }
 
         function onScanFailure(error) {
-            // Abaikan error ini. Ini wajar saat kamera sedang berusaha mencari fokus ke garis barcode.
+            // Error wajar saat kamera mencari fokus garis
         }
 
+        // ================= LOGIKA DATA =================
         function showMessage(msg, isSuccess) {
             const alertBox = document.getElementById('alertMessage');
             alertBox.textContent = msg;
@@ -331,8 +364,6 @@
         }
 
         function prosesScan(kode) {
-            // Karena barcode kamu panjang sekali (misal: 8600000000002306-A0032255001350024),
-            // Pastikan kamu mendaftarkan angka FULL tersebut di menu "Master Barang".
             if (masterData[kode]) {
                 const item = masterData[kode];
                 const now = new Date();
@@ -355,9 +386,9 @@
                 localStorage.setItem('scanHistory', JSON.stringify(scanHistory));
                 
                 renderScanTable();
-                showMessage(`Berhasil! Data untuk ${kode} masuk ke tabel.`, true);
+                showMessage(`Berhasil! [${kode}] terdaftar.`, true);
             } else {
-                showMessage(`Gagal! Barcode [${kode}] belum ada di Master Barang. Silakan daftarkan dulu.`, false);
+                showMessage(`Gagal! Barcode [${kode}] tidak ada di Master Barang.`, false);
             }
         }
 
@@ -391,7 +422,6 @@
             }
         }
 
-        // ================= FITUR MASTER BARANG =================
         function saveMasterData(e) {
             e.preventDefault();
             const kode = document.getElementById('m_kode').value.trim();
@@ -434,7 +464,6 @@
             }
         }
 
-        // ================= EXPORT EXCEL =================
         function exportToExcel() {
             if (scanHistory.length === 0) {
                 alert('Belum ada data hasil scan.');
@@ -471,9 +500,15 @@
             document.body.removeChild(link);
         }
 
+        // Inisialisasi awal
         renderMasterTable();
         renderScanTable();
-        startScanner();
+        
+        // Timeout sedikit untuk memastikan DOM render sempurna sebelum kamera dipanggil
+        setTimeout(() => {
+            startScanner();
+        }, 500);
+        
     </script>
 </body>
 </html>
