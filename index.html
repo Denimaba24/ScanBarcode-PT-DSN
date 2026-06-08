@@ -3,162 +3,240 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Scan Barcode Pabrik - Instan</title>
+    <title>Sistem Scan Barcode Pabrik - Super Responsive</title>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <style>
         :root {
             --primary: #2563eb;
-            --bg-color: #f3f4f6;
-            --text-color: #1f2937;
+            --primary-dark: #1d4ed8;
+            --success: #10b981;
+            --danger: #ef4444;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
         }
+        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
-            color: var(--text-color);
+            color: var(--text-main);
             margin: 0;
             padding: 0;
+            -webkit-tap-highlight-color: transparent;
         }
+
         header {
             background-color: var(--primary);
             color: white;
-            padding: 1rem;
+            padding: 1.2rem 1rem;
             text-align: center;
+            font-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
+
+        header h3 {
+            margin: 0;
+            font-size: 1.3rem;
+            letter-spacing: 0.5px;
+        }
+        
         nav {
             display: flex;
-            justify-content: center;
-            gap: 10px;
-            padding: 10px;
-            background: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background: var(--card-bg);
+            padding: 6px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
+
         nav button {
-            background: none;
-            border: 2px solid var(--primary);
-            color: var(--primary);
-            padding: 0.5rem 1rem;
-            cursor: pointer;
-            border-radius: 4px;
-            font-weight: bold;
             flex: 1;
+            background: none;
+            border: none;
+            padding: 0.75rem;
+            cursor: pointer;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #64748b;
+            transition: all 0.2s ease;
         }
+
         nav button.active {
             background: var(--primary);
             color: white;
         }
+
         .container {
-            max-width: 100%;
-            margin: 1rem auto;
-            padding: 0 1rem;
+            padding: 1rem;
+            max-width: 800px;
+            margin: 0 auto;
         }
+
         .page {
             display: none;
-            background: white;
-            padding: 1rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            background: var(--card-bg);
+            padding: 1.25rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
         }
+
         .page.active {
             display: block;
         }
-        .form-group {
+
+        /* Container Kamera Scanner Modern */
+        .scanner-wrapper {
+            position: relative;
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #000;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.6);
             margin-bottom: 1rem;
         }
+
+        #reader {
+            width: 100% !important;
+            border: none !important;
+        }
+
+        #reader video {
+            object-fit: cover !important;
+        }
+
+        /* Floating Camera Switch Icon */
+        .btn-toggle-cam {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.85);
+            border: none;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            transition: transform 0.2s;
+        }
+
+        .btn-toggle-cam:active {
+            transform: scale(0.9);
+            background: #ffffff;
+        }
+
+        .btn-toggle-cam svg {
+            width: 22px;
+            height: 22px;
+            fill: #334155;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
         .form-group label {
             display: block;
             margin-bottom: 0.5rem;
-            font-weight: bold;
-            font-size: 0.9rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #475569;
         }
+
         .form-group input {
             width: 100%;
             padding: 0.75rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
             box-sizing: border-box;
+            font-size: 1rem;
+            transition: border 0.2s;
         }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .action-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn {
+            border: none;
+            padding: 0.85rem 1rem;
+            cursor: pointer;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: white;
+            transition: background 0.2s;
+            width: 100%;
+        }
+
+        .btn-primary { background-color: var(--primary); }
+        .btn-primary:hover { background-color: var(--primary-dark); }
+        .btn-success { background-color: var(--success); }
+        .btn-danger { background-color: var(--danger); }
+
         .table-responsive {
             overflow-x: auto;
-            margin-top: 1rem;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 600px;
+            font-size: 0.85rem;
+            min-width: 650px;
         }
-        table, th, td {
-            border: 1px solid #ddd;
-        }
+
         th, td {
-            padding: 0.5rem;
+            padding: 0.75rem;
             text-align: left;
-            font-size: 0.9rem;
+            border-bottom: 1px solid #e2e8f0;
         }
+
         th {
-            background-color: var(--primary);
-            color: white;
+            background-color: #f1f5f9;
+            color: #475569;
+            font-weight: 600;
         }
-        .btn-action {
-            background-color: #10b981;
-            color: white;
-            border: none;
-            padding: 0.75rem 1rem;
-            cursor: pointer;
-            border-radius: 4px;
-            font-weight: bold;
-            width: 100%;
-            margin-bottom: 0.5rem;
-        }
-        .btn-action:hover {
-            background-color: #059669;
-        }
-        .btn-camera {
-            background-color: #3b82f6;
-            color: white;
-            border: none;
-            padding: 0.75rem 1rem;
-            cursor: pointer;
-            border-radius: 4px;
-            font-weight: bold;
-            width: 100%;
-            margin-bottom: 1rem;
-        }
-        .btn-danger {
-            background-color: #ef4444;
-            color: white;
-            border: none;
-            padding: 0.75rem 1rem;
-            cursor: pointer;
-            border-radius: 4px;
-            font-weight: bold;
-            width: 100%;
-        }
-        #reader {
-            width: 100%;
-            margin-bottom: 1rem;
+
+        .alert-toast {
+            padding: 0.75rem;
             border-radius: 8px;
-            overflow: hidden;
-            background-color: #000;
-        }
-        .alert {
-            padding: 1rem;
-            border-radius: 4px;
-            margin-bottom: 1rem;
-            display: none;
-            font-weight: bold;
-            text-align: center;
-            word-wrap: break-word;
-        }
-        .alert-success {
             background-color: #d1fae5;
             color: #065f46;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 1rem;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body>
 
     <header>
-        <h3 style="margin: 0;">Scanner HP Pabrik (Instan)</h3>
+        <h3>Sistem Barcode Pabrik Pro</h3>
     </header>
     
     <nav>
@@ -168,19 +246,28 @@
 
     <div class="container">
         <div id="page-scan" class="page active">
-            <h3 style="text-align: center; margin-top:0;">Mode Kamera Scanner Fast-Detect</h3>
-            
-            <div id="alertMessage" class="alert alert-success"></div>
+            <div id="alertToast" class="alert-toast"></div>
 
-            <button class="btn-camera" onclick="toggleCamera()">🔄 Tukar Kamera (Depan / Belakang)</button>
+            <div class="scanner-wrapper">
+                <button class="btn-toggle-cam" onclick="toggleCamera()" title="Tukar Kamera">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M19 8l-4 4h3c0 3.31-2.69 6-6 6-1.01 0-1.97-.25-2.8-.7l-1.46 1.46C8.97 19.54 10.43 20 12 20c4.42 0 8-3.58 8-8h3l-4-4zM6 12c0-3.31 2.69-6 6-6 1.01 0 1.97.25 2.8.7l1.46-1.46C15.03 4.46 13.57 4 12 4c-4.42 0-8 3.58-8 8H1l4 4 4-4H6z"/>
+                    </svg>
+                </button>
+                <div id="reader"></div>
+            </div>
 
-            <div id="reader"></div>
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <input type="text" id="manualInput" placeholder="Hasil Scan / Ketik Manual Kode Di Sini..." style="border: 2px solid var(--primary); text-align: center; font-weight: bold;">
+            </div>
 
-            <button class="btn-action" onclick="exportToExcel()">📥 Export Barcode (Excel/CSV)</button>
-            <button class="btn-danger" onclick="clearScanHistory()">🗑️ Hapus Riwayat Scan</button>
+            <div class="action-container">
+                <button class="btn btn-success" onclick="exportToExcel()">📥 Export Excel</button>
+                <button class="btn btn-danger" onclick="clearScanHistory()">🗑️ Reset Scan</button>
+            </div>
 
             <div class="table-responsive">
-                <table id="tableScan">
+                <table>
                     <thead>
                         <tr>
                             <th>No</th>
@@ -194,45 +281,44 @@
                             <th>Golongan</th>
                         </tr>
                     </thead>
-                    <tbody id="tbodyScan">
-                    </tbody>
+                    <tbody id="tbodyScan"></tbody>
                 </table>
             </div>
         </div>
 
         <div id="page-master" class="page">
-            <h3 style="margin-top:0;">Master Barang (Database Hasil Scan)</h3>
-            <p style="font-size: 0.85rem; color: #666;">Semua barcode yang berhasil di-scan otomatis terdaftar di bawah ini. Anda juga bisa menambahkan manual.</p>
-            
+            <h4 style="margin-top: 0; margin-bottom: 0.5rem;">Database Master Data</h4>
             <form id="formMaster" onsubmit="saveMasterData(event)">
-                <div class="form-group">
-                    <label>Kode Barcode</label>
-                    <input type="text" id="m_kode" required placeholder="Masukkan atau edit kode...">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label>Kode Barcode</label>
+                        <input type="text" id="m_kode" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Panjang</label>
+                        <input type="number" step="0.01" id="m_panjang" required value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Lebar</label>
+                        <input type="number" step="0.01" id="m_lebar" required value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Jumlah Potongan</label>
+                        <input type="number" id="m_jumlah" required value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Persegi</label>
+                        <input type="number" step="0.01" id="m_persegi" required value="0">
+                    </div>
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label>Golongan</label>
+                        <input type="text" id="m_golongan" required value="Scan Otomatis">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Panjang</label>
-                    <input type="number" step="0.01" id="m_panjang" required value="0">
-                </div>
-                <div class="form-group">
-                    <label>Lebar</label>
-                    <input type="number" step="0.01" id="m_lebar" required value="0">
-                </div>
-                <div class="form-group">
-                    <label>Jumlah Potongan</label>
-                    <input type="number" id="m_jumlah" required value="0">
-                </div>
-                <div class="form-group">
-                    <label>Persegi</label>
-                    <input type="number" step="0.01" id="m_persegi" required value="0">
-                </div>
-                <div class="form-group">
-                    <label>Golongan</label>
-                    <input type="text" id="m_golongan" required value="Scan Otomatis">
-                </div>
-                <button type="submit" class="btn-action">Simpan / Perbarui Master Data</button>
+                <button type="submit" class="btn btn-primary" style="margin-top: 5px;">💾 Simpan ke Database</button>
             </form>
 
-            <div class="table-responsive">
+            <div class="table-responsive" style="margin-top: 1.5rem;">
                 <table>
                     <thead>
                         <tr>
@@ -245,8 +331,7 @@
                             <th>Aksi</th>
                         </tr>
                     </thead>
-                    <tbody id="tbodyMaster">
-                    </tbody>
+                    <tbody id="tbodyMaster"></tbody>
                 </table>
             </div>
         </div>
@@ -278,30 +363,43 @@
             }
         }
 
-        // ================= SISTEM KAMERA INSTAN INSTANT-DETECT =================
+        // ================= ENGINE SCANNER RESOLUSI TINGGI (1080P) =================
         function startScanner() {
             if (!html5QrCode) {
                 html5QrCode = new Html5Qrcode("reader");
             }
 
-            const cameraConfig = isFrontCamera ? "user" : { facingMode: "environment" };
+            const cameraMode = isFrontCamera ? "user" : { facingMode: "environment" };
             
+            // Konfigurasi performa tinggi untuk barcode 1D padat & rapat
             const config = { 
-                fps: 25, // Kecepatan frame ditinggikan maksimal agar deteksi instan
+                fps: 30, // Frame rate maksimal
+                experimentalFeatures: {
+                    useBarCodeDetectorIfSupported: true // Gunakan engine native hardware HP jika didukung (Sangat cepat)
+                }
             };
 
-            html5QrCode.start(cameraConfig, config, onScanSuccess, onScanFailure)
+            // Memaksa kamera menggunakan resolusi Full HD / HD agar garis rapat barcode terbaca jelas
+            const localVideoConstraints = {
+                facingMode: isFrontCamera ? "user" : "environment",
+                width: { ideal: 1920, min: 1280 },
+                height: { ideal: 1080, min: 720 }
+            };
+
+            html5QrCode.start(
+                cameraMode, 
+                { fps: config.fps, videoConstraints: localVideoConstraints, experimentalFeatures: config.experimentalFeatures }, 
+                onScanSuccess, 
+                onScanFailure
+            )
             .catch(err => {
-                console.error(err);
-                alert("Gagal membuka kamera. Periksa izin perangkat.");
+                console.error("Kamera gagal dimuat:", err);
             });
         }
 
         function stopScanner() {
             if (html5QrCode && html5QrCode.isScanning) {
-                html5QrCode.stop().then(() => {
-                    html5QrCode.clear();
-                }).catch(err => console.error(err));
+                html5QrCode.stop().then(() => html5QrCode.clear()).catch(err => console.error(err));
             }
         }
 
@@ -320,36 +418,43 @@
         function onScanSuccess(decodedText, decodedResult) {
             const currentTime = new Date().getTime();
             
-            // Pengaman 200 milidetik saja (setara instan bagi mata manusia) 
-            // agar sistem tidak melakukan input ratusan kali dalam satu kedipan kamera pada kode yang sama.
-            if (decodedText === lastScannedCode && (currentTime - lastScanTime) < 200) {
+            // Pengaman instan 100ms agar engine tidak crash membaca kode yang sama serentak
+            if (decodedText === lastScannedCode && (currentTime - lastScanTime) < 100) {
                 return; 
             }
 
             lastScannedCode = decodedText;
             lastScanTime = currentTime;
             
+            document.getElementById('manualInput').value = decodedText;
+
             if(window.navigator && window.navigator.vibrate){
-                window.navigator.vibrate(150); 
+                window.navigator.vibrate(100); 
             }
 
             prosesScan(decodedText);
         }
 
         function onScanFailure(error) {
-            // Mengabaikan log error pencarian garis agar performa HP tetap enteng
+            // Pengabaian log kegagalan fokus frame demi menjaga kecepatan performa web
         }
 
-        // ================= OTOMATISASI MASUK MASTER BARANG =================
+        // Memicu pencatatan manual via input field jika diperlukan cepat
+        document.getElementById('manualInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const val = this.value.trim();
+                if(val) prosesScan(val);
+            }
+        });
+
+        // ================= INTEGRASI REKAPITULASI DATA =================
         function prosesScan(kode) {
             const now = new Date();
             const tanggal = now.toISOString().split('T')[0];
             const jam = now.toTimeString().split(' ')[0];
 
-            // JIKA BELUM ADA DI MASTER BARANG, OTOMATIS DAFTARKAN
+            // OTOMATIS MASUK & TERSIMPAN DI MASTER BARANG JIKA BELUM ADA
             if (!masterData[kode]) {
-                // Mencoba memecah isi tulisan barcode jika ada pola text ukuran bawaan (seperti L 255 W 13.5 P 24 dll)
-                // Jika tidak ada, diisi nilai default 0 agar user bisa merapikannya di tab Master.
                 masterData[kode] = {
                     panjang: 0,
                     lebar: 0,
@@ -374,19 +479,18 @@
                 golongan: item.golongan
             };
 
-            // Simpan riwayat scan
             scanHistory.push(scanRecord);
             localStorage.setItem('scanHistory', JSON.stringify(scanHistory));
             
             renderScanTable();
-            showMessage(`Terdeteksi & Tersimpan: ${kode}`);
+            showToast(`Sukses Record: ${kode}`);
         }
 
-        function showMessage(msg) {
-            const alertBox = document.getElementById('alertMessage');
-            alertBox.textContent = msg;
-            alertBox.style.display = 'block';
-            setTimeout(() => { alertBox.style.display = 'none'; }, 1500);
+        function showToast(msg) {
+            const toast = document.getElementById('alertToast');
+            toast.textContent = msg;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 2000);
         }
 
         function renderScanTable() {
@@ -396,20 +500,20 @@
                 tbody.innerHTML += `
                     <tr>
                         <td>${index + 1}</td>
-                        <td style="word-break: break-all; font-size:0.8rem;">${record.kode}</td>
+                        <td style="word-break: break-all; font-weight: 600; color: var(--primary);">${record.kode}</td>
                         <td>${record.panjang}</td>
                         <td>${record.lebar}</td>
                         <td>${record.jumlah}</td>
                         <td>${record.persegi}</td>
                         <td>${record.tanggal}</td>
                         <td>${record.jam}</td>
-                        <td>${record.golongan}</td>
+                        <td><span style="background: #e2e8f0; padding: 2px 6px; border-radius:4px;">${record.golongan}</span></td>
                     </tr>
                 `;
             });
         }
 
-        // ================= MANAGEMENT MASTER DATA =================
+        // ================= TAB MANAGEMENT MASTER =================
         function saveMasterData(e) {
             e.preventDefault();
             const kode = document.getElementById('m_kode').value.trim();
@@ -424,10 +528,9 @@
             
             localStorage.setItem('masterBarang', JSON.stringify(masterData));
             e.target.reset();
-            // Kembalikan default text golongan setelah reset form
             document.getElementById('m_golongan').value = "Scan Otomatis";
             renderMasterTable();
-            alert('Data Master Berhasil Diperbarui!');
+            alert('Database Berhasil Diupdate!');
         }
 
         function editMaster(kode){
@@ -441,7 +544,7 @@
         }
 
         function hapusMaster(kode) {
-            if(confirm('Hapus item ini dari Master Barang?')) {
+            if(confirm('Hapus item dari Master?')) {
                 delete masterData[kode];
                 localStorage.setItem('masterBarang', JSON.stringify(masterData));
                 renderMasterTable();
@@ -455,15 +558,15 @@
                 const item = masterData[kode];
                 tbody.innerHTML += `
                     <tr>
-                        <td style="word-break: break-all; font-size: 0.75rem; max-width:150px;">${kode}</td>
+                        <td style="word-break: break-all; max-width: 160px;">${kode}</td>
                         <td>${item.panjang}</td>
                         <td>${item.lebar}</td>
                         <td>${item.jumlah}</td>
                         <td>${item.persegi}</td>
-                        <td><span style="font-size:0.8rem; color:#4b5563;">${item.golongan}</span></td>
+                        <td>${item.golongan}</td>
                         <td>
-                            <button style="background:#3b82f6;color:white;border:none;padding:3px 6px;border-radius:3px;cursor:pointer;margin-bottom:2px;" onclick="editMaster('${kode}')">Edit</button>
-                            <button style="background:red;color:white;border:none;padding:3px 6px;border-radius:3px;cursor:pointer;" onclick="hapusMaster('${kode}')">Hapus</button>
+                            <button style="background:#3b82f6; color:white; border:none; padding:3px 6px; border-radius:4px; cursor:pointer;" onclick="editMaster('${kode}')">Edit</button>
+                            <button style="background:var(--danger); color:white; border:none; padding:3px 6px; border-radius:4px; cursor:pointer;" onclick="hapusMaster('${kode}')">Hapus</button>
                         </td>
                     </tr>
                 `;
@@ -471,22 +574,20 @@
         }
 
         function clearScanHistory() {
-            if(confirm('Hapus semua riwayat scan hari ini?')) {
+            if(confirm('Hapus seluruh riwayat scan saat ini?')) {
                 scanHistory = [];
                 localStorage.setItem('scanHistory', JSON.stringify(scanHistory));
                 renderScanTable();
             }
         }
 
-        // ================= EXPORT DATA EXCEL =================
         function exportToExcel() {
             if (scanHistory.length === 0) {
-                alert('Belum ada data hasil scan.');
+                alert('Tidak ada data yang bisa diexport.');
                 return;
             }
 
             let csvContent = "No,Kode Barcode,Panjang,Lebar,Jml Potongan,Persegi,Tanggal Scan,Jam Scan,Golongan\n";
-
             scanHistory.forEach((row, index) => {
                 let rowData = [
                     index + 1,
@@ -505,21 +606,19 @@
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             const url = URL.createObjectURL(blob);
-            
             const dateStr = new Date().toISOString().split('T')[0];
             link.setAttribute("href", url);
-            link.setAttribute("download", `Rekap_Scan_Pabrik_${dateStr}.csv`);
+            link.setAttribute("download", `Rekap_Scan_${dateStr}.csv`);
             link.style.visibility = 'hidden';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
         }
 
-        // Load awal data
+        // Inisialisasi awal
         renderMasterTable();
         renderScanTable();
-        
-        setTimeout(() => { startScanner(); }, 400);
+        setTimeout(() => { startScanner(); }, 300);
     </script>
 </body>
 </html>
