@@ -264,8 +264,8 @@
         border-radius: var(--radius-md);
         overflow: hidden;
         background-color: #000;
-        aspect-ratio: 1 / 1; /* Kotak sempurna di HP */
-        max-height: 50vh; /* Agar tidak kepanjangan di HP kecil */
+        aspect-ratio: 1 / 1;
+        max-height: 50vh;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -442,7 +442,7 @@
         border: 1px solid var(--glass-border);
         border-radius: var(--radius-md);
         outline: none;
-        font-size: 16px; /* Wajib iOS untuk mencegah zoom otomatis */
+        font-size: 16px;
         background: rgba(0, 0, 0, 0.2);
         color: var(--text-primary);
         font-family: inherit;
@@ -476,7 +476,7 @@
       .table-wrapper {
         width: 100%;
         overflow-x: auto;
-        -webkit-overflow-scrolling: touch; /* Momentum scrolling ala iOS */
+        -webkit-overflow-scrolling: touch;
         border-radius: var(--radius-md);
         background: rgba(0, 0, 0, 0.2);
         max-height: 55vh;
@@ -654,7 +654,7 @@
             <table>
               <thead>
                 <tr>
-                  <th>Aksi</th>
+                  <th>No</th>
                   <th>Kode</th>
                   <th>Gol</th>
                   <th>P</th>
@@ -662,6 +662,7 @@
                   <th>Pot</th>
                   <th>M²</th>
                   <th>Jam</th>
+                  <th>Aksi</th>
                 </tr>
               </thead>
               <tbody id="tableToday"></tbody>
@@ -712,7 +713,7 @@
             <table>
               <thead>
                 <tr>
-                  <th>Aksi</th>
+                  <th>No</th>
                   <th>Kode</th>
                   <th>Gol</th>
                   <th>P</th>
@@ -721,6 +722,7 @@
                   <th>M²</th>
                   <th>Tgl</th>
                   <th>Jam</th>
+                  <th>Aksi</th>
                 </tr>
               </thead>
               <tbody id="tableAll"></tbody>
@@ -1196,6 +1198,7 @@
         return tgl;
       }
 
+      // PERUBAHAN JS: Render HARI INI
       function renderToday() {
         const tbody = document.getElementById("tableToday");
         const nowDate = new Date();
@@ -1210,23 +1213,26 @@
         tbody.innerHTML = "";
 
         if (fData.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 40px; color: var(--text-muted);">Belum ada data di-scan hari ini</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding: 40px; color: var(--text-muted);">Belum ada data di-scan hari ini</td></tr>`;
           return;
         }
 
-        fData.forEach((i) => {
+        fData.forEach((i, idx) => {
           const tr = document.createElement("tr");
+          // Format baru: No ... Aksi
           tr.innerHTML = `
-            <td><button class="btn-del" onclick="hapus(${i.id}, '${i.kode}', 'today')"><i class="fas fa-trash"></i></button></td>
+            <td>${idx + 1}</td>
             <td><span class="badge">${i.kode}</span></td>
             <td><b>${i.golongan}</b></td>
             <td>${i.panjang}</td><td>${i.lebar}</td><td>${i.potongan}</td><td>${i.persegi}</td>
             <td>${i.jam.substring(0, 5)}</td>
+            <td><button class="btn-del" onclick="hapus(${i.id}, '${i.kode}', 'today')"><i class="fas fa-trash"></i></button></td>
           `;
           tbody.appendChild(tr);
         });
       }
 
+      // PERUBAHAN JS: Render DATABASE
       function renderDatabase() {
         const tbody = document.getElementById("tableAll");
         const start = document.getElementById("start").value;
@@ -1249,18 +1255,20 @@
         tbody.innerHTML = "";
 
         if (fData.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding: 40px; color: var(--text-muted);">Database kosong atau data tidak ditemukan</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding: 40px; color: var(--text-muted);">Database kosong atau data tidak ditemukan</td></tr>`;
           return;
         }
 
-        fData.forEach((i) => {
+        fData.forEach((i, idx) => {
           const tr = document.createElement("tr");
+          // Format baru: No ... Aksi
           tr.innerHTML = `
-            <td><button class="btn-del" onclick="hapus(${i.id}, '${i.kode}', 'db')"><i class="fas fa-trash"></i></button></td>
+            <td>${idx + 1}</td>
             <td><span class="badge">${i.kode}</span></td>
             <td><b>${i.golongan}</b></td>
             <td>${i.panjang}</td><td>${i.lebar}</td><td>${i.potongan}</td><td>${i.persegi}</td>
             <td>${formatTgl(i.tanggal)}</td><td>${i.jam.substring(0, 5)}</td>
+            <td><button class="btn-del" onclick="hapus(${i.id}, '${i.kode}', 'db')"><i class="fas fa-trash"></i></button></td>
           `;
           tbody.appendChild(tr);
         });
