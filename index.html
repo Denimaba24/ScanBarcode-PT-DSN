@@ -11,7 +11,7 @@
       name="apple-mobile-web-app-status-bar-style"
       content="black-translucent"
     />
-    <title>Scan Barcode PT.Daya Sakti Niaga</title>
+    <title>Scanner - PT. Daya Sakti Niaga</title>
 
     <link
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap"
@@ -114,12 +114,13 @@
       }
 
       .topbar-title {
-        font-size: 1.25rem;
+        font-size: 1.15rem;
         font-family: "Space Grotesk", sans-serif;
         font-weight: 700;
         background: linear-gradient(135deg, var(--secondary), var(--accent));
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        letter-spacing: 0.5px;
       }
 
       .engine-badge {
@@ -582,10 +583,12 @@
   </head>
   <body>
     <div class="topbar">
+      <!-- PERUBAHAN: Nama PT dipindah ke sini agar permanen -->
       <div class="topbar-title">
-        <i class="fas fa-qrcode" style="margin-right: 8px"></i> SCAN BARCODE
+        <i class="fas fa-qrcode" style="margin-right: 8px"></i> PT. Daya Sakti
+        Niaga
       </div>
-      <span class="engine-badge" id="engineBadge">PT.Daya Sakti Niaga</span>
+      <span class="engine-badge" id="engineBadge">SCANNER</span>
     </div>
 
     <div class="container">
@@ -860,6 +863,7 @@
       let zxingReader = null;
 
       if (hasNativeScanner && !isIOS) {
+        // Biarkan script hanya memodifikasi ini menjadi keterangan perangkat, bukan PT lagi
         document.getElementById("engineBadge").innerText = "HW ACCEL";
         nativeDetector = new BarcodeDetector({
           formats: [
@@ -1325,8 +1329,8 @@
         const dt = dataArray.map((i, idx) => ({
           No: idx + 1,
           "Kode Barcode": i.kode,
-          "P (Panjang)": i.panjang,
-          "L (Lebar)": i.lebar,
+          "Panjang (Panjang)": i.panjang,
+          "Lebar (Lebar)": i.lebar,
           Potongan: i.potongan,
           "Persegi (m2)": i.persegi,
           Golongan: i.golongan,
