@@ -61,12 +61,16 @@
         -webkit-tap-highlight-color: transparent;
       }
 
+      html {
+        -webkit-text-size-adjust: 100%; /* Mencegah auto-resize teks di iOS */
+      }
+
       html,
       body {
         width: 100%;
         max-width: 100vw;
         overflow-x: hidden;
-        overscroll-behavior-y: none;
+        overscroll-behavior-y: none; /* Mencegah pull-to-refresh bawaan browser */
         background:
           radial-gradient(circle at 15% 50%, #1e1b4b, transparent 50%),
           radial-gradient(circle at 85% 30%, #312e81, transparent 50%),
@@ -78,12 +82,18 @@
       }
 
       body {
-        padding-top: env(safe-area-inset-top);
-        /* Ruang ekstra di bawah untuk Bottom Navigation */
-        padding-bottom: calc(80px + env(safe-area-inset-bottom));
+        /* Menggunakan dvh agar tinggi pas mengikuti Safari/Chrome mobile */
         min-height: 100vh;
+        min-height: 100dvh;
         display: flex;
         flex-direction: column;
+      }
+
+      button,
+      a,
+      input,
+      select {
+        touch-action: manipulation; /* Anti delay 300ms saat disentuh */
       }
 
       /* ============ TOP NAVBAR ============ */
@@ -93,11 +103,13 @@
         -webkit-backdrop-filter: var(--glass-blur);
         border-bottom: 1px solid var(--glass-border);
         padding: 16px 20px;
+        /* Padding atas menyesuaikan Notch iPhone */
+        padding-top: max(16px, env(safe-area-inset-top));
         display: flex;
         align-items: center;
         justify-content: space-between;
         position: sticky;
-        top: env(safe-area-inset-top);
+        top: 0;
         z-index: 100;
       }
 
@@ -124,7 +136,7 @@
         border: 1px solid rgba(16, 185, 129, 0.3);
       }
 
-      /* ============ BOTTOM NAVIGATION (Khas Aplikasi Mobile) ============ */
+      /* ============ BOTTOM NAVIGATION ============ */
       .bottom-nav {
         position: fixed;
         bottom: 0;
@@ -136,6 +148,7 @@
         border-top: 1px solid var(--glass-border);
         display: flex;
         justify-content: space-around;
+        /* Padding bawah menyesuaikan Home Indicator iOS */
         padding: 12px 10px calc(12px + env(safe-area-inset-bottom)) 10px;
         z-index: 999;
         box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
@@ -177,14 +190,14 @@
 
       /* ============ PAGE VIEWS LOGIC ============ */
       .view-page {
-        display: none; /* Sembunyikan semua halaman secara default */
+        display: none;
         opacity: 0;
         transition: opacity 0.3s ease;
         animation: fadeIn 0.4s forwards;
       }
 
       .view-page.active {
-        display: flex; /* Hanya tampilkan yang aktif */
+        display: flex;
         flex-direction: column;
         gap: 24px;
         opacity: 1;
@@ -203,9 +216,12 @@
 
       .container {
         padding: 20px 16px;
+        /* Memberikan jarak agar elemen bawah tidak tertutup Bottom Nav */
+        padding-bottom: calc(100px + env(safe-area-inset-bottom));
         max-width: 800px;
         margin: 0 auto;
         width: 100%;
+        flex: 1;
       }
 
       /* ============ CARDS (GLASSMORPHISM) ============ */
@@ -248,7 +264,8 @@
         border-radius: var(--radius-md);
         overflow: hidden;
         background-color: #000;
-        aspect-ratio: 1 / 1;
+        aspect-ratio: 1 / 1; /* Kotak sempurna di HP */
+        max-height: 50vh; /* Agar tidak kepanjangan di HP kecil */
         display: flex;
         align-items: center;
         justify-content: center;
@@ -425,7 +442,7 @@
         border: 1px solid var(--glass-border);
         border-radius: var(--radius-md);
         outline: none;
-        font-size: 16px; /* Wajib iOS */
+        font-size: 16px; /* Wajib iOS untuk mencegah zoom otomatis */
         background: rgba(0, 0, 0, 0.2);
         color: var(--text-primary);
         font-family: inherit;
@@ -459,7 +476,7 @@
       .table-wrapper {
         width: 100%;
         overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
+        -webkit-overflow-scrolling: touch; /* Momentum scrolling ala iOS */
         border-radius: var(--radius-md);
         background: rgba(0, 0, 0, 0.2);
         max-height: 55vh;
@@ -552,7 +569,7 @@
         color: #60a5fa;
       }
 
-      /* SweetAlert2 */
+      /* SweetAlert2 Mobile Fixes */
       div:where(.swal2-container) div:where(.swal2-popup) {
         background: rgba(15, 23, 42, 0.85);
         backdrop-filter: blur(20px);
@@ -813,33 +830,26 @@
         color: "#fff",
       });
 
-      // ---- NAVIGATION LOGIC (GANTI HALAMAN) ----
       function switchPage(pageId, navElement) {
-        // Jika sedang scan dan pindah dari menu scan, matikan kamera otomatis hemat baterai
         if (pageId !== "view-scan" && isScanning) {
           toggleScan();
         }
 
-        // Sembunyikan semua halaman
         document.querySelectorAll(".view-page").forEach((page) => {
           page.classList.remove("active");
         });
 
-        // Reset warna ikon navbar bawah
         document.querySelectorAll(".nav-item").forEach((item) => {
           item.classList.remove("active");
         });
 
-        // Tampilkan halaman yang dituju
         document.getElementById(pageId).classList.add("active");
         navElement.classList.add("active");
 
-        // Jika masuk ke halaman tabel, refresh datanya
         if (pageId === "view-session") renderToday();
         if (pageId === "view-database") renderDatabase();
       }
 
-      // ---- HARDWARE DETECTOR ----
       const isIOS =
         /iPad|iPhone|iPod/.test(navigator.userAgent) ||
         (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
@@ -1186,7 +1196,6 @@
         return tgl;
       }
 
-      // Render khusus Tab Hari Ini
       function renderToday() {
         const tbody = document.getElementById("tableToday");
         const nowDate = new Date();
@@ -1197,7 +1206,7 @@
           .split("T")[0];
 
         let fData = allData.filter((i) => i.tanggal === hariIni);
-        fData.sort((a, b) => (b.scannedAt || 0) - (a.scannedAt || 0)); // Terbaru di atas
+        fData.sort((a, b) => (b.scannedAt || 0) - (a.scannedAt || 0));
         tbody.innerHTML = "";
 
         if (fData.length === 0) {
@@ -1218,7 +1227,6 @@
         });
       }
 
-      // Render khusus Tab Database
       function renderDatabase() {
         const tbody = document.getElementById("tableAll");
         const start = document.getElementById("start").value;
