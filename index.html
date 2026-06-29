@@ -28,10 +28,11 @@
     ></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
     <style>
       :root {
-        /* Vibrant Premium Palette */
         --primary: #8b5cf6;
         --primary-light: #a78bfa;
         --secondary: #3b82f6;
@@ -39,38 +40,31 @@
         --success: #10b981;
         --warning: #f59e0b;
         --danger: #ef4444;
-
-        /* Glassmorphism System */
         --glass-bg: rgba(255, 255, 255, 0.05);
         --glass-bg-hover: rgba(255, 255, 255, 0.1);
         --glass-border: rgba(255, 255, 255, 0.15);
         --glass-blur: blur(20px);
-
         --text-primary: #ffffff;
         --text-secondary: rgba(255, 255, 255, 0.7);
         --text-muted: rgba(255, 255, 255, 0.4);
-
         --radius-lg: 24px;
         --radius-md: 16px;
       }
-
       * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
         -webkit-tap-highlight-color: transparent;
       }
-
       html {
-        -webkit-text-size-adjust: 100%; /* Mencegah auto-resize teks di iOS */
+        -webkit-text-size-adjust: 100%;
       }
-
       html,
       body {
         width: 100%;
         max-width: 100vw;
         overflow-x: hidden;
-        overscroll-behavior-y: none; /* Mencegah pull-to-refresh bawaan browser */
+        overscroll-behavior-y: none;
         background:
           radial-gradient(circle at 15% 50%, #1e1b4b, transparent 50%),
           radial-gradient(circle at 85% 30%, #312e81, transparent 50%),
@@ -80,30 +74,25 @@
         color: var(--text-primary);
         font-family: "Plus Jakarta Sans", sans-serif;
       }
-
       body {
-        /* Menggunakan dvh agar tinggi pas mengikuti Safari/Chrome mobile */
         min-height: 100vh;
         min-height: 100dvh;
         display: flex;
         flex-direction: column;
       }
-
       button,
       a,
       input,
       select {
-        touch-action: manipulation; /* Anti delay 300ms saat disentuh */
+        touch-action: manipulation;
       }
 
-      /* ============ TOP NAVBAR ============ */
       .topbar {
         background: rgba(2, 6, 23, 0.6);
         backdrop-filter: var(--glass-blur);
         -webkit-backdrop-filter: var(--glass-blur);
         border-bottom: 1px solid var(--glass-border);
         padding: 16px 20px;
-        /* Padding atas menyesuaikan Notch iPhone */
         padding-top: max(16px, env(safe-area-inset-top));
         display: flex;
         align-items: center;
@@ -112,7 +101,6 @@
         top: 0;
         z-index: 100;
       }
-
       .topbar-title {
         font-size: 1.15rem;
         font-family: "Space Grotesk", sans-serif;
@@ -122,7 +110,6 @@
         -webkit-text-fill-color: transparent;
         letter-spacing: 0.5px;
       }
-
       .engine-badge {
         font-size: 0.65rem;
         background: linear-gradient(
@@ -136,8 +123,6 @@
         font-weight: 800;
         border: 1px solid rgba(16, 185, 129, 0.3);
       }
-
-      /* ============ BOTTOM NAVIGATION ============ */
       .bottom-nav {
         position: fixed;
         bottom: 0;
@@ -149,12 +134,10 @@
         border-top: 1px solid var(--glass-border);
         display: flex;
         justify-content: space-around;
-        /* Padding bawah menyesuaikan Home Indicator iOS */
         padding: 12px 10px calc(12px + env(safe-area-inset-bottom)) 10px;
         z-index: 999;
         box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
       }
-
       .nav-item {
         display: flex;
         flex-direction: column;
@@ -166,44 +149,37 @@
         transition: all 0.3s ease;
         flex: 1;
       }
-
       .nav-item i {
         font-size: 1.3rem;
         transition: transform 0.2s ease;
       }
-
       .nav-item span {
         font-size: 0.65rem;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.5px;
       }
-
       .nav-item.active {
         color: var(--primary-light);
       }
-
       .nav-item.active i {
         transform: translateY(-3px) scale(1.1);
         color: var(--primary-light);
         filter: drop-shadow(0 0 8px rgba(167, 139, 250, 0.6));
       }
 
-      /* ============ PAGE VIEWS LOGIC ============ */
       .view-page {
         display: none;
         opacity: 0;
         transition: opacity 0.3s ease;
         animation: fadeIn 0.4s forwards;
       }
-
       .view-page.active {
         display: flex;
         flex-direction: column;
         gap: 24px;
         opacity: 1;
       }
-
       @keyframes fadeIn {
         from {
           opacity: 0;
@@ -217,15 +193,14 @@
 
       .container {
         padding: 20px 16px;
-        /* Memberikan jarak agar elemen bawah tidak tertutup Bottom Nav */
-        padding-bottom: calc(100px + env(safe-area-inset-bottom));
+        /* Padding bawah ditingkatkan ke 150px agar tombol Zona Berbahaya tidak tertutup nav */
+        padding-bottom: calc(150px + env(safe-area-inset-bottom));
         max-width: 800px;
         margin: 0 auto;
         width: 100%;
         flex: 1;
       }
 
-      /* ============ CARDS (GLASSMORPHISM) ============ */
       .card {
         background: var(--glass-bg);
         backdrop-filter: var(--glass-blur);
@@ -235,7 +210,6 @@
         box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
         border: 1px solid var(--glass-border);
       }
-
       .card-header {
         font-weight: 700;
         margin-bottom: 24px;
@@ -245,7 +219,6 @@
         gap: 12px;
         color: var(--text-primary);
       }
-
       .card-header i {
         color: var(--primary-light);
         background: rgba(139, 92, 246, 0.2);
@@ -253,12 +226,10 @@
         border-radius: 8px;
       }
 
-      /* ============ SCANNER UI ============ */
       .scanner-wrapper {
         position: relative;
         margin-bottom: 28px;
       }
-
       .scanner-container {
         position: relative;
         width: 100%;
@@ -273,14 +244,12 @@
         border: 2px solid rgba(139, 92, 246, 0.3);
         box-shadow: 0 0 30px rgba(139, 92, 246, 0.15);
       }
-
       #videoElement {
         width: 100%;
         height: 100%;
         object-fit: cover;
         display: none;
       }
-
       .targeting-box {
         position: absolute;
         top: 15%;
@@ -315,7 +284,6 @@
         border-width: 0 4px 4px 0;
         border-bottom-right-radius: 16px;
       }
-
       .laser-overlay {
         position: absolute;
         top: 50%;
@@ -347,7 +315,6 @@
           top: 85%;
         }
       }
-
       .scanner-placeholder {
         color: var(--text-muted);
         font-size: 1rem;
@@ -363,7 +330,6 @@
         opacity: 0.5;
       }
 
-      /* Floating Action Bar */
       .floating-controls {
         display: flex;
         gap: 12px;
@@ -382,7 +348,6 @@
         margin-left: auto;
         margin-right: auto;
       }
-
       .btn {
         border: none;
         font-weight: 700;
@@ -399,7 +364,6 @@
       .btn:active {
         transform: scale(0.95);
       }
-
       .btn-icon {
         width: 50px;
         border-radius: 50%;
@@ -412,7 +376,6 @@
         color: #000;
         border-color: var(--warning);
       }
-
       .btn-scan {
         flex: 1;
         background: linear-gradient(135deg, var(--primary), var(--secondary));
@@ -425,7 +388,6 @@
         background: linear-gradient(135deg, var(--danger), #be123c);
       }
 
-      /* ============ INPUTS & FORMS ============ */
       .input-group {
         margin-bottom: 18px;
       }
@@ -452,7 +414,6 @@
         border-color: var(--primary-light);
         background: rgba(0, 0, 0, 0.4);
       }
-
       .manual-input-wrapper {
         display: flex;
         gap: 10px;
@@ -466,14 +427,12 @@
         border-radius: var(--radius-md);
         padding: 0 20px;
       }
-
       .filter-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 12px;
       }
 
-      /* ============ TABLES ============ */
       .table-wrapper {
         width: 100%;
         overflow-x: auto;
@@ -506,7 +465,6 @@
         font-size: 0.75rem;
         text-transform: uppercase;
       }
-
       .badge {
         background: linear-gradient(
           135deg,
@@ -520,7 +478,6 @@
         font-size: 0.8rem;
         font-family: "Space Grotesk", monospace;
       }
-
       .btn-del {
         color: #fca5a5;
         background: rgba(239, 68, 68, 0.15);
@@ -533,25 +490,30 @@
         justify-content: center;
       }
 
-      /* ============ EXPORT BUTTONS BIG ============ */
+      .export-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 24px;
+      }
       .btn-export-big {
         background: rgba(255, 255, 255, 0.05);
         border: 1px solid var(--glass-border);
         color: var(--text-primary);
         width: 100%;
-        padding: 24px;
+        padding: 18px 12px;
         border-radius: var(--radius-lg);
-        font-size: 1.1rem;
+        font-size: 0.9rem;
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 12px;
-        margin-bottom: 16px;
+        gap: 8px;
+        text-align: center;
       }
       .btn-export-big i {
-        font-size: 2.5rem;
+        font-size: 2rem;
       }
-      .btn-export-big.accent {
+      .btn-export-big.excel {
         background: linear-gradient(
           135deg,
           rgba(16, 185, 129, 0.2),
@@ -559,6 +521,15 @@
         );
         border-color: rgba(16, 185, 129, 0.3);
         color: #34d399;
+      }
+      .btn-export-big.pdf {
+        background: linear-gradient(
+          135deg,
+          rgba(239, 68, 68, 0.2),
+          rgba(239, 68, 68, 0.05)
+        );
+        border-color: rgba(239, 68, 68, 0.3);
+        color: #fca5a5;
       }
       .btn-export-big.blue {
         background: linear-gradient(
@@ -569,8 +540,12 @@
         border-color: rgba(59, 130, 246, 0.3);
         color: #60a5fa;
       }
-
-      /* SweetAlert2 Mobile Fixes */
+      .btn-danger-zone {
+        background: rgba(239, 68, 68, 0.1);
+        border-color: rgba(239, 68, 68, 0.3);
+        color: #fca5a5;
+        margin-top: 10px;
+      }
       div:where(.swal2-container) div:where(.swal2-popup) {
         background: rgba(15, 23, 42, 0.85);
         backdrop-filter: blur(20px);
@@ -583,7 +558,6 @@
   </head>
   <body>
     <div class="topbar">
-      <!-- PERUBAHAN: Nama PT dipindah ke sini agar permanen -->
       <div class="topbar-title">
         <i class="fas fa-qrcode" style="margin-right: 8px"></i> PT. Daya Sakti
         Niaga
@@ -597,18 +571,15 @@
           <div class="card-header">
             <i class="fas fa-camera-viewfinder"></i> Pindai Barcode
           </div>
-
           <div class="scanner-wrapper">
             <div class="scanner-container" id="scannerBox">
               <div class="scanner-placeholder" id="placeholderMsg">
-                <i class="fas fa-video-slash"></i>
-                <span>Kamera Offline</span>
+                <i class="fas fa-video-slash"></i><span>Kamera Offline</span>
               </div>
               <video id="videoElement" autoplay playsinline muted></video>
               <div class="targeting-box" id="targetBox"></div>
               <div class="laser-overlay" id="laser"></div>
             </div>
-
             <div class="floating-controls">
               <button
                 class="btn btn-icon"
@@ -629,7 +600,6 @@
               </button>
             </div>
           </div>
-
           <div class="input-group" style="margin-top: 10px">
             <label>Input Manual (Darurat)</label>
             <div class="manual-input-wrapper">
@@ -679,11 +649,10 @@
           <div class="card-header">
             <i class="fas fa-database"></i> Master Database
           </div>
-
           <div class="filter-grid">
             <div class="input-group">
-              <label>Dari Tanggal</label>
-              <input
+              <label>Dari Tanggal</label
+              ><input
                 type="date"
                 class="form-control"
                 id="start"
@@ -691,8 +660,8 @@
               />
             </div>
             <div class="input-group">
-              <label>Sampai Tanggal</label>
-              <input
+              <label>Sampai Tanggal</label
+              ><input
                 type="date"
                 class="form-control"
                 id="end"
@@ -700,10 +669,9 @@
               />
             </div>
           </div>
-
           <div class="input-group">
-            <label>Pencarian</label>
-            <input
+            <label>Pencarian</label
+            ><input
               type="search"
               class="form-control"
               id="search"
@@ -711,7 +679,6 @@
               onkeyup="renderDatabase()"
             />
           </div>
-
           <div class="table-wrapper">
             <table>
               <thead>
@@ -746,70 +713,99 @@
               margin-bottom: 24px;
             "
           >
-            Pilih format laporan yang ingin Anda unduh ke dalam format Microsoft
-            Excel (.xlsx).
+            Pilih format laporan yang ingin Anda unduh (Excel / PDF).
           </p>
 
-          <button
-            class="btn btn-export-big accent"
-            onclick="downloadExcelHarian()"
+          <label
+            style="
+              display: block;
+              font-size: 0.8rem;
+              font-weight: 700;
+              color: var(--text-secondary);
+              margin-bottom: 12px;
+              text-transform: uppercase;
+            "
+            >Export Khusus Hari Ini</label
           >
-            <i class="fas fa-file-excel"></i>
-            <div>
-              <strong>Export Data Harian</strong>
-              <div
-                style="
-                  font-size: 0.8rem;
-                  color: var(--text-secondary);
-                  font-weight: 400;
-                  margin-top: 4px;
-                "
-              >
-                Unduh khusus hasil scan hari ini
-              </div>
-            </div>
+          <div class="export-grid">
+            <button
+              class="btn btn-export-big excel"
+              onclick="downloadExcelHarian()"
+            >
+              <i class="fas fa-file-excel"></i>
+              <div><strong>Excel Hari Ini</strong></div>
+            </button>
+            <button
+              class="btn btn-export-big pdf"
+              onclick="downloadPDFHarian()"
+            >
+              <i class="fas fa-file-pdf"></i>
+              <div><strong>PDF Hari Ini</strong></div>
+            </button>
+          </div>
+
+          <label
+            style="
+              display: block;
+              font-size: 0.8rem;
+              font-weight: 700;
+              color: var(--text-secondary);
+              margin-bottom: 12px;
+              text-transform: uppercase;
+            "
+            >Export Keseluruhan Database</label
+          >
+          <div class="export-grid">
+            <button
+              class="btn btn-export-big blue"
+              onclick="downloadExcelSemua()"
+            >
+              <i class="fas fa-archive"></i>
+              <div><strong>Master Excel</strong></div>
+            </button>
+            <button class="btn btn-export-big pdf" onclick="downloadPDFSemua()">
+              <i class="fas fa-file-pdf"></i>
+              <div><strong>Master PDF</strong></div>
+            </button>
+          </div>
+
+          <hr style="border-color: rgba(255, 255, 255, 0.05); margin: 20px 0" />
+          <h4
+            style="
+              margin-bottom: 10px;
+              font-size: 0.85rem;
+              color: var(--danger);
+              text-transform: uppercase;
+            "
+          >
+            Zona Berbahaya
+          </h4>
+          <button
+            class="btn btn-export-big btn-danger-zone"
+            onclick="hapusSemuaData()"
+          >
+            <i class="fas fa-triangle-exclamation"></i>
+            <div><strong>Reset Total Memori Aplikasi</strong></div>
           </button>
 
-          <button
-            class="btn btn-export-big blue"
-            onclick="downloadExcelSemua()"
-          >
-            <i class="fas fa-archive"></i>
-            <div>
-              <strong>Export Semua Database</strong>
-              <div
-                style="
-                  font-size: 0.8rem;
-                  color: var(--text-secondary);
-                  font-weight: 400;
-                  margin-top: 4px;
-                "
-              >
-                Unduh seluruh riwayat data tersimpan
-              </div>
-            </div>
-          </button>
+          <div style="height: 30px"></div>
         </div>
       </div>
     </div>
 
     <nav class="bottom-nav">
-      <a class="nav-item active" onclick="switchPage('view-scan', this)">
-        <i class="fas fa-qrcode"></i>
-        <span>Scan</span>
-      </a>
-      <a class="nav-item" onclick="switchPage('view-session', this)">
-        <i class="fas fa-clipboard-check"></i>
-        <span>Hari Ini</span>
-      </a>
-      <a class="nav-item" onclick="switchPage('view-database', this)">
-        <i class="fas fa-server"></i>
-        <span>Database</span>
-      </a>
-      <a class="nav-item" onclick="switchPage('view-export', this)">
-        <i class="fas fa-download"></i>
-        <span>Export</span>
-      </a>
+      <a class="nav-item active" onclick="switchPage('view-scan', this)"
+        ><i class="fas fa-qrcode"></i><span>Scan</span></a
+      >
+      <a class="nav-item" onclick="switchPage('view-session', this)"
+        ><i class="fas fa-clipboard-check"></i><span>Hari Ini</span></a
+      >
+      <a class="nav-item" onclick="switchPage('view-database', this)"
+        ><i class="fas fa-server"></i><span>Database</span></a
+      >
+      <a class="nav-item" onclick="switchPage('view-export', this)"
+        ><i class="fas fa-download"></i><span>Export</span></a
+      >
     </nav>
 
     <script>
@@ -835,22 +831,35 @@
         color: "#fff",
       });
 
-      function switchPage(pageId, navElement) {
-        if (pageId !== "view-scan" && isScanning) {
-          toggleScan();
+      let lastCheckedDay = new Date().getDate();
+      setInterval(() => {
+        const currentDay = new Date().getDate();
+        if (currentDay !== lastCheckedDay) {
+          lastCheckedDay = currentDay;
+          renderToday();
         }
+      }, 60000);
 
-        document.querySelectorAll(".view-page").forEach((page) => {
-          page.classList.remove("active");
-        });
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") {
+          const currentDay = new Date().getDate();
+          if (currentDay !== lastCheckedDay) {
+            lastCheckedDay = currentDay;
+            renderToday();
+          }
+        }
+      });
 
-        document.querySelectorAll(".nav-item").forEach((item) => {
-          item.classList.remove("active");
-        });
-
+      function switchPage(pageId, navElement) {
+        if (pageId !== "view-scan" && isScanning) toggleScan();
+        document
+          .querySelectorAll(".view-page")
+          .forEach((page) => page.classList.remove("active"));
+        document
+          .querySelectorAll(".nav-item")
+          .forEach((item) => item.classList.remove("active"));
         document.getElementById(pageId).classList.add("active");
         navElement.classList.add("active");
-
         if (pageId === "view-session") renderToday();
         if (pageId === "view-database") renderDatabase();
       }
@@ -863,7 +872,6 @@
       let zxingReader = null;
 
       if (hasNativeScanner && !isIOS) {
-        // Biarkan script hanya memodifikasi ini menjadi keterangan perangkat, bukan PT lagi
         document.getElementById("engineBadge").innerText = "HW ACCEL";
         nativeDetector = new BarcodeDetector({
           formats: [
@@ -912,43 +920,54 @@
       }
 
       function initAudio() {
-        if (!audioCtx) {
+        if (!audioCtx)
           audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
         if (audioCtx.state === "suspended") audioCtx.resume();
       }
 
       function parsePayloadToFields(text) {
         const raw = (text || "").trim();
         if (!raw) return null;
+
         if (raw.startsWith("86") && raw.length >= 24) {
           try {
-            const p_str = raw.slice(-4),
-              w_str = raw.slice(-9, -4),
-              l_str = raw.slice(-12, -9),
-              prefix = raw.slice(2, -16);
-            const golongan = prefix.replace(/^0+/, "") || "-";
-            const p_indo = parseInt(l_str, 10),
-              l_indo = parseInt(w_str, 10) / 10,
-              potongan = parseInt(p_str, 10);
+            const p_str = raw.slice(-4);
+            const w_str = raw.slice(-9, -4);
+            const l_str = raw.slice(-12, -9);
+            const ext_str = raw.slice(-16, -12);
+            const prefix = raw.slice(2, -16);
+
+            let golongan = prefix.replace(/^0+/, "");
+            if (!golongan) golongan = "-";
+
+            const p_indo = parseInt(l_str, 10);
+            const l_indo = parseInt(w_str, 10) / 10;
+            const potongan = parseInt(p_str, 10);
             const persegi = (p_indo * l_indo * potongan) / 10000;
+
+            const extNum = parseInt(ext_str, 10);
+            const golonganDisplay = !isNaN(extNum)
+              ? `${golongan} (${extNum.toString().padStart(3, "0")})`
+              : golongan;
+
             if (!isNaN(p_indo) && !isNaN(l_indo) && !isNaN(potongan)) {
               return {
                 panjang: p_indo,
                 lebar: l_indo,
                 potongan: potongan,
                 persegi: persegi.toFixed(2),
-                golongan: golongan,
+                golongan: golonganDisplay,
               };
             }
           } catch (e) {}
         }
+
         return {
           panjang: "-",
           lebar: "-",
           potongan: "-",
           persegi: "-",
-          golongan: "-",
+          golongan: raw,
         };
       }
 
@@ -983,6 +1002,7 @@
           isTorchOn = false;
           document.getElementById("btnTorch").classList.remove("active");
           cancelAnimationFrame(scanLoopFrame);
+
           if (streamTrack) {
             streamTrack.stop();
             streamTrack = null;
@@ -995,6 +1015,7 @@
             zxingReader.reset();
             zxingReader = null;
           }
+
           video.style.display = "none";
           laser.style.display = "none";
           targetBox.style.display = "none";
@@ -1013,19 +1034,64 @@
               '<i class="fas fa-stop" style="margin-right: 6px;"></i> STOP';
             btn.classList.add("stop");
             isScanning = true;
+
             let constraints = {
               video: {
-                facingMode: currentCam,
-                width: { ideal: 1080 },
-                height: { ideal: 1080 },
+                facingMode: { ideal: currentCam },
+                width: { ideal: 1280, min: 640 },
+                height: { ideal: 720, min: 480 },
               },
             };
-            if (!isIOS)
-              constraints.video.advanced = [{ focusMode: "continuous" }];
-            const stream =
-              await navigator.mediaDevices.getUserMedia(constraints);
+
+            let stream;
+            try {
+              stream = await navigator.mediaDevices.getUserMedia(constraints);
+            } catch (e) {
+              stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: "environment" },
+              });
+            }
+
+            video.setAttribute("autoplay", "");
+            video.setAttribute("muted", "");
+            video.setAttribute("playsinline", "");
+
             video.srcObject = stream;
             streamTrack = stream.getVideoTracks()[0];
+
+            try {
+              const capabilities = streamTrack.getCapabilities();
+              let advancedConstraints = [];
+
+              if (
+                capabilities.focusMode &&
+                capabilities.focusMode.includes("continuous")
+              ) {
+                advancedConstraints.push({ focusMode: "continuous" });
+              }
+
+              if (capabilities.zoom) {
+                const minZoom = capabilities.zoom.min || 1;
+                const maxZoom = capabilities.zoom.max || 2;
+                const targetZoom = Math.min(maxZoom, Math.max(minZoom, 1.7));
+                advancedConstraints.push({ zoom: targetZoom });
+              }
+
+              if (advancedConstraints.length > 0) {
+                await streamTrack.applyConstraints({
+                  advanced: advancedConstraints,
+                });
+              }
+            } catch (err) {
+              console.log(
+                "Perangkat tidak mendukung kontrol zoom/fokus manual",
+                err,
+              );
+            }
+
+            await new Promise((resolve) => {
+              video.onloadedmetadata = () => resolve();
+            });
             await video.play();
 
             if (nativeDetector) {
@@ -1033,39 +1099,48 @@
                 if (!isScanning) return;
                 try {
                   const barcodes = await nativeDetector.detect(video);
-                  if (barcodes.length > 0)
+                  if (barcodes.length > 0) {
                     processBarcodeDetected(
                       barcodes[0].rawValue,
                       barcodes[0].format.toUpperCase(),
                     );
+                  }
                 } catch (e) {}
-                scanLoopFrame = requestAnimationFrame(detectLoop);
+
+                setTimeout(() => {
+                  if (isScanning)
+                    scanLoopFrame = requestAnimationFrame(detectLoop);
+                }, 50);
               };
               scanLoopFrame = requestAnimationFrame(detectLoop);
             } else {
               zxingReader = new ZXing.BrowserMultiFormatReader(getZXingHints());
-              zxingReader.timeBetweenDecodingAttempts = 0;
+
+              zxingReader.timeBetweenDecodingAttempts = 80;
+
               zxingReader.decodeFromStream(
                 stream,
                 "videoElement",
                 (result, err) => {
-                  if (result)
+                  if (result) {
                     processBarcodeDetected(
                       result.getText(),
                       result.getBarcodeFormat
                         ? result.getBarcodeFormat().toString()
                         : "UNKNOWN",
                     );
+                  }
                 },
               );
             }
           } catch (err) {
+            console.error("Camera Init Error:", err);
             Swal.fire(
-              "Error",
-              "Kamera gagal dimuat. Izinkan akses kamera di pengaturan browser.",
+              "Kamera Gagal",
+              "Izin kamera belum diberikan atau browser tidak mendukung fitur ini.",
               "error",
             );
-            toggleScan();
+            if (isScanning) toggleScan();
           }
         }
       }
@@ -1080,6 +1155,7 @@
           }
           return;
         }
+
         scannedCodesSet.add(code);
         simpanData(code, format);
       }
@@ -1202,7 +1278,6 @@
         return tgl;
       }
 
-      // PERUBAHAN JS: Render HARI INI
       function renderToday() {
         const tbody = document.getElementById("tableToday");
         const nowDate = new Date();
@@ -1217,26 +1292,19 @@
         tbody.innerHTML = "";
 
         if (fData.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding: 40px; color: var(--text-muted);">Belum ada data di-scan hari ini</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding: 40px; color: var(--text-muted);">Belum ada data di-scan pada hari ini</td></tr>`;
           return;
         }
 
         fData.forEach((i, idx) => {
           const tr = document.createElement("tr");
-          // Format baru: No ... Aksi
-          tr.innerHTML = `
-            <td>${idx + 1}</td>
-            <td><span class="badge">${i.kode}</span></td>
-            <td><b>${i.golongan}</b></td>
-            <td>${i.panjang}</td><td>${i.lebar}</td><td>${i.potongan}</td><td>${i.persegi}</td>
-            <td>${i.jam.substring(0, 5)}</td>
-            <td><button class="btn-del" onclick="hapus(${i.id}, '${i.kode}', 'today')"><i class="fas fa-trash"></i></button></td>
-          `;
+          tr.innerHTML = `<td>${idx + 1}</td><td><span class="badge">${i.kode}</span></td><td><b>${i.golongan}</b></td>
+            <td>${i.panjang}</td><td>${i.lebar}</td><td>${i.potongan}</td><td>${i.persegi}</td><td>${i.jam.substring(0, 5)}</td>
+            <td><button class="btn-del" onclick="hapus(${i.id}, 'today')"><i class="fas fa-trash"></i></button></td>`;
           tbody.appendChild(tr);
         });
       }
 
-      // PERUBAHAN JS: Render DATABASE
       function renderDatabase() {
         const tbody = document.getElementById("tableAll");
         const start = document.getElementById("start").value;
@@ -1265,20 +1333,18 @@
 
         fData.forEach((i, idx) => {
           const tr = document.createElement("tr");
-          // Format baru: No ... Aksi
-          tr.innerHTML = `
-            <td>${idx + 1}</td>
-            <td><span class="badge">${i.kode}</span></td>
-            <td><b>${i.golongan}</b></td>
+          tr.innerHTML = `<td>${idx + 1}</td><td><span class="badge">${i.kode}</span></td><td><b>${i.golongan}</b></td>
             <td>${i.panjang}</td><td>${i.lebar}</td><td>${i.potongan}</td><td>${i.persegi}</td>
             <td>${formatTgl(i.tanggal)}</td><td>${i.jam.substring(0, 5)}</td>
-            <td><button class="btn-del" onclick="hapus(${i.id}, '${i.kode}', 'db')"><i class="fas fa-trash"></i></button></td>
-          `;
+            <td><button class="btn-del" onclick="hapus(${i.id}, 'db')"><i class="fas fa-trash"></i></button></td>`;
           tbody.appendChild(tr);
         });
       }
 
-      function hapus(id, kode, source) {
+      function hapus(id, source) {
+        const itemTarget = allData.find((i) => i.id === id);
+        if (!itemTarget) return;
+
         Swal.fire({
           title: "Hapus Data?",
           text: "Data akan dihapus permanen.",
@@ -1292,7 +1358,7 @@
           if (res.isConfirmed) {
             allData = allData.filter((i) => i.id !== id);
             localStorage.setItem(STORAGE_KEY, JSON.stringify(allData));
-            scannedCodesSet.delete(kode);
+            scannedCodesSet.delete(itemTarget.kode);
             if (source === "today") {
               renderToday();
               renderDatabase();
@@ -1301,6 +1367,28 @@
               renderDatabase();
               renderToday();
             }
+          }
+        });
+      }
+
+      function hapusSemuaData() {
+        Swal.fire({
+          title: "RESET TOTAL?",
+          text: "Seluruh data akan dihapus permanen dari memori HP ini!",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "var(--danger)",
+          cancelButtonColor: "rgba(255, 255, 255, 0.1)",
+          confirmButtonText: "Ya, Hapus Semua",
+          cancelButtonText: "Batal",
+        }).then((res) => {
+          if (res.isConfirmed) {
+            localStorage.removeItem(STORAGE_KEY);
+            allData = [];
+            scannedCodesSet.clear();
+            renderToday();
+            renderDatabase();
+            Toast.fire({ icon: "success", title: "Aplikasi direset!" });
           }
         });
       }
@@ -1329,19 +1417,84 @@
         const dt = dataArray.map((i, idx) => ({
           No: idx + 1,
           "Kode Barcode": i.kode,
-          "Panjang (Panjang)": i.panjang,
-          "Lebar (Lebar)": i.lebar,
+          Panjang: i.panjang,
+          Lebar: i.lebar,
           Potongan: i.potongan,
           "Persegi (m2)": i.persegi,
           Golongan: i.golongan,
           Tanggal: formatTgl(i.tanggal),
           Jam: i.jam,
-          "Format Scan": i.format || "",
         }));
         const ws = XLSX.utils.json_to_sheet(dt);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Database");
         XLSX.writeFile(wb, `Export_SCM_${label}_${new Date().getTime()}.xlsx`);
+      }
+
+      function downloadPDFHarian() {
+        const nowDate = new Date();
+        const hariIni = new Date(
+          nowDate.getTime() - nowDate.getTimezoneOffset() * 60000,
+        )
+          .toISOString()
+          .split("T")[0];
+        const dataHarian = allData.filter((i) => i.tanggal === hariIni);
+        if (dataHarian.length === 0)
+          return Swal.fire("Kosong", "Tidak ada data hari ini.", "info");
+        exportToPDF(dataHarian, "Harian_" + hariIni);
+      }
+
+      function downloadPDFSemua() {
+        if (allData.length === 0)
+          return Swal.fire("Kosong", "Database kosong.", "info");
+        exportToPDF(allData, "Master_Data");
+      }
+
+      function exportToPDF(dataArray, label) {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF("p", "pt", "a4");
+        doc.setFontSize(14);
+        doc.text(`Laporan Data Scan - PT. Daya Sakti Niaga`, 40, 40);
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.text(`Tipe Laporan: ${label.replace(/_/g, " ")}`, 40, 55);
+
+        const tableColumn = [
+          "No",
+          "Kode Barcode",
+          "Gol",
+          "Panjang",
+          "Lebar",
+          "Pot",
+          "M2",
+          "Tanggal",
+          "Jam",
+        ];
+        const tableRows = [];
+        dataArray
+          .sort((a, b) => (a.scannedAt || 0) - (b.scannedAt || 0))
+          .forEach((i, idx) => {
+            tableRows.push([
+              idx + 1,
+              i.kode,
+              i.golongan,
+              i.panjang,
+              i.lebar,
+              i.potongan,
+              i.persegi,
+              formatTgl(i.tanggal),
+              i.jam,
+            ]);
+          });
+
+        doc.autoTable({
+          head: [tableColumn],
+          body: tableRows,
+          startY: 70,
+          styles: { fontSize: 8 },
+          headStyles: { fillColor: [139, 92, 246] },
+        });
+        doc.save(`Export_SCM_${label}_${new Date().getTime()}.pdf`);
       }
     </script>
   </body>
